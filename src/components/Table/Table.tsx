@@ -1,52 +1,84 @@
 import { TableRow } from "../TableRow/TableRow";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks/hooks";
-import { setFilter } from "../../users/userSlice";
+import {
+  filterUsers,
+  resetFilterValue,
+  setFilter,
+} from "../../users/userSlice";
+import { FC } from "react";
+import {
+  UserStateFilterBy,
+  UserStateStatus,
+} from "../../users/models/UserModels";
+import { Loader } from "../Loader/Loader";
+import { Error } from "../Error/Error";
 
-export const Table = () => {
+export const Table: FC = () => {
   const filterBy = useAppSelector((state) => state.usersState.filterBy);
+  const status = useAppSelector((state) => state.usersState.status);
   const dispatch = useAppDispatch();
-  console.log("render table");
+
+  const handleColumnClick = (filterType: UserStateFilterBy) => {
+    if (filterBy !== filterType) {
+      dispatch(resetFilterValue());
+      dispatch(setFilter(filterType));
+      dispatch(filterUsers(""));
+    }
+  };
+
   return (
     <>
       <table>
         <thead>
           <tr>
             <th
-              className={filterBy === "name" ? "selected" : ""}
-              onClick={() => {
-                dispatch(setFilter("name"));
-              }}
+              style={{ width: "25%" }}
+              className={filterBy === UserStateFilterBy.name ? "selected" : ""}
+              onClick={() => handleColumnClick(UserStateFilterBy.name)}
             >
               Name
             </th>
             <th
-              className={filterBy === "username" ? "selected" : ""}
-              onClick={() => {
-                dispatch(setFilter("username"));
-              }}
+              style={{ width: "25%" }}
+              className={
+                filterBy === UserStateFilterBy.username ? "selected" : ""
+              }
+              onClick={() => handleColumnClick(UserStateFilterBy.username)}
             >
               Username
             </th>
             <th
-              className={filterBy === "email" ? "selected" : ""}
-              onClick={() => {
-                dispatch(setFilter("email"));
-              }}
+              style={{ width: "25%" }}
+              className={filterBy === UserStateFilterBy.email ? "selected" : ""}
+              onClick={() => handleColumnClick(UserStateFilterBy.email)}
             >
               Email
             </th>
             <th
-              className={filterBy === "phone" ? "selected" : ""}
-              onClick={() => {
-                dispatch(setFilter("phone"));
-              }}
+              style={{ width: "25%" }}
+              className={filterBy === UserStateFilterBy.phone ? "selected" : ""}
+              onClick={() => handleColumnClick(UserStateFilterBy.phone)}
             >
               Phone
             </th>
           </tr>
         </thead>
         <tbody>
-          <TableRow />
+          {status === UserStateStatus.loading ? (
+            <tr>
+              <td colSpan={4}>
+                <Loader />
+              </td>
+            </tr>
+          ) : status === UserStateStatus.succeeded ? (
+            <TableRow />
+          ) : (
+            <tr>
+              <td colSpan={4}>
+                <Error />
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </>

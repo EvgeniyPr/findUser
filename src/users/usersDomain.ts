@@ -1,4 +1,4 @@
-import { UserFromDb } from "../models/UserModels";
+import { UserFromDb } from "./models/UserModels";
 
 export const usersDomain = {
   mapedUsers(users: UserFromDb[]) {

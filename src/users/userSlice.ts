@@ -1,18 +1,20 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { User } from "../models/UserModels";
+import { User, UserStateFilterBy, UserStateStatus } from "./models/UserModels";
 import { fetchUsers } from "./usersApi";
 
 interface UsersState {
   users: User[];
-  status: "idle" | "loading" | "succeeded" | "failed";
-  filterBy: "name" | "username" | "email" | "phone";
+  status: UserStateStatus;
+  filterBy: UserStateFilterBy;
+  filterValue: string;
   filteredUsers: User[];
 }
 
 const initialState: UsersState = {
   users: [],
-  status: "idle",
-  filterBy: "name",
+  status: UserStateStatus.idle,
+  filterBy: UserStateFilterBy.name,
+  filterValue: "",
   filteredUsers: [],
 };
 
@@ -23,6 +25,14 @@ export const usersSlice = createSlice({
     setFilter(state, action) {
       state.filterBy = action.payload;
     },
+    setFilterValue(state, action) {
+      state.filterValue = action.payload;
+    },
+
+    resetFilterValue(state) {
+      state.filterValue = "";
+    },
+
     filterUsers(state, action) {
       const searchTerm = action.payload.toLowerCase();
       state.filteredUsers = state.users.filter((user) =>
@@ -34,18 +44,20 @@ export const usersSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchUsers.pending, (state) => {
-        state.status = "loading";
+        state.status = UserStateStatus.loading;
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.status = UserStateStatus.succeeded;
         state.users = action.payload;
         state.filteredUsers = action.payload;
+        sessionStorage.setItem("usersData", JSON.stringify(action.payload));
       })
       .addCase(fetchUsers.rejected, (state) => {
-        state.status = "failed";
+        state.status = UserStateStatus.failed;
       });
   },
 });
 
-export const { setFilter, filterUsers } = usersSlice.actions;
+export const { setFilter, filterUsers, setFilterValue, resetFilterValue } =
+  usersSlice.actions;
 export const usersReduser = usersSlice.reducer;

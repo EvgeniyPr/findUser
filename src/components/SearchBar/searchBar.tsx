@@ -1,12 +1,15 @@
 import { ChangeEvent, FC } from "react";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks/hooks";
-import { filterUsers } from "../../users/userSlice";
+import { filterUsers, setFilterValue } from "../../users/userSlice";
 
 export const SearchBar: FC = () => {
   const filterBy = useAppSelector((state) => state.usersState.filterBy);
+  const filterValue = useAppSelector((state) => state.usersState.filterValue);
   const dispatch = useAppDispatch();
+
   const filter = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.value);
+    sessionStorage.setItem("currentFilter", e.target.value);
+    dispatch(setFilterValue(e.target.value));
     dispatch(filterUsers(e.target.value));
   };
   return (
@@ -44,6 +47,7 @@ export const SearchBar: FC = () => {
           {`Search user by ${filterBy}:`}
         </p>
         <input
+          value={filterValue}
           style={{
             padding: "10px 15px",
             fontSize: "16px",
